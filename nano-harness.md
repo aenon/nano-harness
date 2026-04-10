@@ -396,16 +396,18 @@ Compare: Completion rate at round N
 ```
 Layer          | Option              | Notes
 --------------|--------------------|-------------------
-Web Framework | FastAPI            | Simple, async
-Agent Logic   | Custom (minimal)   | Full control
-Model API     | vLLM              | OpenAI-compatible
-State        | SQLite + JSON files | Checkpoints
-Task Queue   | asyncio.Queue      | In-process
+Interface     | CLI (click)        | Terminal-based
+Agent Logic  | Custom (minimal)  | Full control
+Model API    | vLLM             | OpenAI-compatible
+State       | SQLite + JSON      | Checkpoints
+Task Queue  | asyncio.Queue     | In-process
 ```
+
+> FastAPI can be added later if web API is needed.
 
 ### Phase 1: Minimal Viable Harness (Week 1-2)
 
-- [ ] FastAPI server (basic endpoints)
+- [ ] CLI entry point (click)
 - [ ] Task input/output handling
 - [ ] Model client (vLLM API)
 - [ ] Simple tool execution (subprocess)
