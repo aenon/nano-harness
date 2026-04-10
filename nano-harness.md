@@ -391,20 +391,32 @@ Compare: Completion rate at round N
 
 ## Implementation Roadmap
 
+### Tech Stack
+
+```
+Layer          | Option              | Notes
+--------------|--------------------|-------------------
+Web Framework | FastAPI            | Simple, async
+Agent Logic   | Custom (minimal)   | Full control
+Model API     | vLLM              | OpenAI-compatible
+State        | SQLite + JSON files | Checkpoints
+Task Queue   | asyncio.Queue      | In-process
+```
+
 ### Phase 1: Minimal Viable Harness (Week 1-2)
 
-- [ ] API server (FastAPI)
-- [ ] Basic task queue
-- [ ] Single orchestrator agent
-- [ ] Tool registry
+- [ ] FastAPI server (basic endpoints)
+- [ ] Task input/output handling
+- [ ] Model client (vLLM API)
+- [ ] Simple tool execution (subprocess)
 - [ ] Checkpoint to file
 
 ### Phase 2: Multi-Agent Support (Week 3-4)
 
-- [ ] Agent pool
+- [ ] Agent pool (orchestrator + subagents)
 - [ ] Subagent invocation
 - [ ] Tool dispatch
-- [ ] State management
+- [ ] State management (SQLite)
 
 ### Phase 3: Evaluation (Week 5-6)
 
