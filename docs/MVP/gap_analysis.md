@@ -1,26 +1,23 @@
 # Gap Analysis - Nano Harness MVP
 
-## 🔴 Resolved
+## ✅ Resolved
 
 | Gap | Decision |
 |-----|----------|
 | 1 | LLM: NVIDIA NIM endpoint, model nemotron-3-nano-30b-a3b |
 | 2 | Tool: shell (bash command execution) |
 | 3 | Success: Use larger model (GPT/Claude) to analyze results qualitatively |
+| 4 | Model behavior - Works with tool calling (tested) |
+| 5 | Test prompt criteria - Two-tier: works/fails |
+| 6 | Checkpoint schema - Minimal (task, round, prompt, response, tools) |
+| 7 | Feature toggle - If/else in code |
 
 ## Current Status
 
-- ✅ LLM configured (awaiting API key in .env)
+- ✅ LLM configured and working
 - ✅ Tool: shell only
-- ✅ Success criteria: Qualitative analysis by larger model
-- ✅ Items 4-10: Decisions made above
-
-| Gap | Description | Recommendation |
-|-----|-------------|----------------|
-| 4 | **Model behavior** - Will 30B do tool calling? | Test with simple reasoning prompt first |
-| 5 | **Test prompt criteria** | Use qualitative (works/fails) for MVP, quantify later |
-| 6 | **Checkpoint schema** | Keep minimal: task, round, prompt, response, tools |
-| 7 | **Feature toggle** | If/else in code toggles behavior |
+- ✅ Success criteria: Qualitative analysis
+- ✅ All gaps resolved
 
 ## 🟢 Minor (Can decide later)
 

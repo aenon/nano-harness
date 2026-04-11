@@ -6,10 +6,13 @@
 candidate_judge = false
 
 # Multi-step planning: decompose into multiple steps
-multi_step_planning = false
+multi_step_planning = true
 
 # Subagents: use specialized agents vs single orchestrator
 subagents = false
 
 # Checkpointing: persist state between rounds
 checkpointing = true
+
+# Planning: retry limit for failed steps
+planning_retry_limit = 2
