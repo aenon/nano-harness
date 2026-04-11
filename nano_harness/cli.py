@@ -89,8 +89,28 @@ def _run_with_planning(llm, tools, state, config, task: str, max_rounds: int):
     for step_num, step_desc in enumerate(steps, 1):
         click.echo(f"\n[Step {step_num}/{len(steps)}] {step_desc}")
 
-        # Execute step
+        # Execute step with retry
+        success = _execute_step(llm, tools, state, config, task, step_num, step_desc, max_rounds)
+
+        if success:
+            click.echo(f"  [Step {step_num}] Complete.")
+        else:
+            click.echo(f"  [Step {step_num}] Failed after {config.planning_retry_limit} retries.")
+
+    click.echo("\n" + "=" * 40)
+    click.echo("Execution complete.")
+
+
+def _execute_step(llm, tools, state, config, task: str, step_num: int, step_desc: str, max_rounds: int) -> bool:
+    """Execute a single step with retry logic."""
+    retry_limit = config.planning_retry_limit
+
+    for attempt in range(1, retry_limit + 1):
+        if attempt > 1:
+            click.echo(f"  [Retry {attempt}/{retry_limit}]")
+
         messages = [{"role": "user", "content": step_desc}]
+        step_failed = False
 
         for round_num in range(1, max_rounds + 1):
             tool_schemas = tools.get_all_schemas() if tools.names() else None
@@ -108,28 +128,32 @@ def _run_with_planning(llm, tools, state, config, task: str, max_rounds: int):
                     output = result.output[:200] if result.output else result.error
                     click.echo(f"  Result: {output}{'...' if len(result.output or result.error) > 200 else ''}")
 
-                    # Check for failure
                     if not result.success:
-                        # Retry logic
-                        state.update_step_status(
-                            step_num, "failed", retry_count=1
-                        )
-                        click.echo("  [Retry] Step failed, attempting again...")
-                        # Continue to next iteration of while loop
+                        step_failed = True
+                        break
 
                     messages.append({
                         "role": "tool",
                         "tool_call_id": tc.id,
-                        "content": result.output if result.success else result.error,
+                        "content": result.output,
                     })
+
+                if step_failed:
+                    break
             else:
                 # No tool calls - step complete
                 break
 
-        click.echo(f"  [Step {step_num}] Complete.")
+        if not step_failed:
+            # Success - save to state
+            if config.checkpointing:
+                state.update_step_status(step_num, "completed", result="Step completed successfully")
+            return True
 
-    click.echo("\n" + "=" * 40)
-    click.echo("Execution complete.")
+    # Failed after all retries
+    if config.checkpointing:
+        state.update_step_status(step_num, "failed", result="Failed after retries")
+    return False
 
 
 def _parse_steps(text: str) -> list[str]:

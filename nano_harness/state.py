@@ -28,7 +28,6 @@ class PlanStep:
     description: str
     status: str  # pending, executing, completed, failed
     result: Optional[str]
-    retry_count: int
     created_at: str
 
 
@@ -61,7 +60,6 @@ class State:
                 description TEXT NOT NULL,
                 status TEXT DEFAULT 'pending',
                 result TEXT,
-                retry_count INTEGER DEFAULT 0,
                 created_at TEXT NOT NULL
             )
         """)
@@ -142,7 +140,7 @@ class State:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         cursor = conn.execute(
-            """SELECT id, task, step_num, description, status, result, retry_count, created_at
+            """SELECT id, task, step_num, description, status, result, created_at
             FROM plan_steps WHERE task = ? ORDER BY step_num""",
             (task,),
         )
@@ -155,40 +153,21 @@ class State:
         step_id: int,
         status: str,
         result: Optional[str] = None,
-        retry_count: Optional[int] = None,
     ) -> None:
         """Update step status."""
         conn = sqlite3.connect(self.db_path)
         if result is not None:
             conn.execute(
-                "UPDATE plan_steps SET status = ?, result = ? WHERE id = ?",
+                "UPDATE plan_steps SET status = ?, result = ? WHERE step_num = ?",
                 (status, result, step_id),
-            )
-        elif retry_count is not None:
-            conn.execute(
-                "UPDATE plan_steps SET status = ?, retry_count = ? WHERE id = ?",
-                (status, retry_count, step_id),
             )
         else:
             conn.execute(
-                "UPDATE plan_steps SET status = ? WHERE id = ?",
+                "UPDATE plan_steps SET status = ? WHERE step_num = ?",
                 (status, step_id),
             )
         conn.commit()
         conn.close()
-
-    def get_pending_steps(self, task: str) -> list[PlanStep]:
-        """Get pending steps for a task."""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.execute(
-            """SELECT id, task, step_num, description, status, result, retry_count, created_at
-            FROM plan_steps WHERE task = ? AND status = 'pending' ORDER BY step_num""",
-            (task,),
-        )
-        records = [PlanStep(**dict(row)) for row in cursor.fetchall()]
-        conn.close()
-        return records
 
 
 # Default state instance
