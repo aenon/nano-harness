@@ -98,3 +98,30 @@ CREATE TABLE plan_steps (
 - ✅ State stored externally (SQLite)
 - ✅ On failure: retry, then continue
 - ✅ User sees plan updates
+
+---
+
+## Bonus: Candidate Judge Per Step (Future)
+
+Can combine with `candidate_judge` feature:
+
+| Option | When | Pros | Cons |
+|-------|------|------|-------|
+| **A** | After each step | Catch failures early | 2x LLM calls per step |
+| **B** | After all steps | Cheaper | Late failure detection |
+| **C** | Optional per step | Flexible | More complex |
+
+### Suggested: Option A (if enabled)
+
+If both `multi_step_planning=true` and `candidate_judge=true`:
+
+1. Execute step
+2. Judge evaluates step result
+3. If fail: retry/adjust
+4. Continue to next step
+
+### Cost Consideration
+
+- Without judge: 1 LLM call per step
+- With judge: 2 LLM calls per step (step + judge)
+- For 3 steps: 3 calls vs 6 calls
