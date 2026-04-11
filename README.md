@@ -81,7 +81,7 @@ nano_harness/
 
 ```bash
 # Install dev dependencies
-uv sync --dev
+uv sync --group dev
 
 # Lint
 uv run ruff check nano_harness/
