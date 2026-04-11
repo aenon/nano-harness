@@ -33,6 +33,8 @@ class LLMClient:
             api_key=config.llm_api_key,
         )
         self.model = config.llm_model
+        self.temperature = config.temperature
+        self.system_prompt = config.system_prompt
         self.reasoning_budget = config.reasoning_budget
         self.enable_thinking = config.enable_thinking
 
@@ -43,6 +45,12 @@ class LLMClient:
         max_tokens: int = 4096,
     ) -> LLMResponse:
         """Send a chat request to the LLM."""
+        # Build messages with system prompt if provided
+        all_messages = []
+        if self.system_prompt:
+            all_messages.append({"role": "system", "content": self.system_prompt})
+        all_messages.extend(messages)
+
         # Build extra body parameters
         extra_body = {}
         if self.reasoning_budget:
@@ -53,8 +61,9 @@ class LLMClient:
         # Build request
         kwargs = {
             "model": self.model,
-            "messages": messages,
+            "messages": all_messages,
             "max_tokens": max_tokens,
+            "temperature": self.temperature,
         }
         if tools:
             kwargs["tools"] = tools
