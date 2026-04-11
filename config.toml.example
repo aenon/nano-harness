@@ -1,0 +1,15 @@
+# Nano Harness Configuration
+# Features can be toggled on/off for experimentation
+
+[features]
+# Candidate-Judge: external subagent evaluates candidate
+candidate_judge = false
+
+# Multi-step planning: decompose into multiple steps
+multi_step_planning = false
+
+# Subagents: use specialized agents vs single orchestrator
+subagents = false
+
+# Checkpointing: persist state between rounds
+checkpointing = false
