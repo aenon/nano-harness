@@ -15,11 +15,19 @@ def cli():
 
 @cli.command()
 @click.argument("task")
+@click.option("--system", default="", help="System prompt")
+@click.option("--temperature", "-t", default=0.7, type=float, help="Sampling temperature")
 @click.option("--max-rounds", default=5, help="Maximum execution rounds")
 @click.option("--db", default="nano_harness.db", help="Database path")
-def run(task: str, max_rounds: int, db: str):
+def run(task: str, system: str, temperature: float, max_rounds: int, db: str):
     """Run a task with the LLM and tools."""
     config = load_config()
+
+    # CLI options override config
+    if system:
+        config.system_prompt = system
+    if temperature:
+        config.temperature = temperature
 
     # Check required config
     if not config.llm_base_url or not config.llm_api_key:

@@ -16,6 +16,10 @@ class Config:
     llm_api_key: str
     llm_model: str
 
+    # Sampling
+    temperature: float = 0.7
+    system_prompt: str = ""
+
     # Reasoning (optional)
     reasoning_budget: Optional[int] = None
     enable_thinking: bool = False
@@ -43,6 +47,8 @@ def load_config(config_path: Optional[str] = None) -> Config:
         llm_base_url=os.getenv("LLM_BASE_URL", ""),
         llm_api_key=os.getenv("LLM_API_KEY", ""),
         llm_model=model,
+        temperature=float(os.getenv("TEMPERATURE", "0.7")),
+        system_prompt=os.getenv("SYSTEM_PROMPT", ""),
         reasoning_budget=int(os.getenv("REASONING_BUDGET", "0")) or None,
         enable_thinking=os.getenv("ENABLE_THINKING", "false").lower() == "true",
     )
