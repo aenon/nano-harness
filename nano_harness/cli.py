@@ -1,10 +1,15 @@
 """CLI entry point for nano-harness."""
+import re
+
 import click
 
 from .client import LLMClient
 from .config import load_config
 from .state import get_state
 from .tools import get_registry
+
+PLANNING_PROMPT = """You are a task planner. Break down the user's task into actionable steps.
+Format: Each step on a new line, starting with "- ". Keep steps simple and sequential."""
 
 
 @click.group()
@@ -47,6 +52,104 @@ def run(task: str, system: str, temperature: float, max_rounds: int, db: str):
                f"checkpointing={config.checkpointing}")
     click.echo("-" * 40)
 
+    # Multi-step planning mode
+    if config.multi_step_planning:
+        _run_with_planning(llm, tools, state, config, task, max_rounds)
+    else:
+        _run_simple(llm, tools, state, config, task, max_rounds)
+
+
+def _run_with_planning(llm, tools, state, config, task: str, max_rounds: int):
+    """Run a task with multi-step planning."""
+    # Phase 1: Planning
+    click.echo("\n[Planning] Creating plan...")
+    planning_messages = [
+        {"role": "system", "content": PLANNING_PROMPT},
+        {"role": "user", "content": f"Task: {task}\nBreak down into steps:"},
+    ]
+    response = llm.chat(planning_messages)
+    plan_text = response.content
+
+    # Parse steps from response
+    steps = _parse_steps(plan_text)
+    if not steps:
+        click.echo("Failed to parse plan, running without planning.")
+        _run_simple(llm, tools, state, config, task, max_rounds)
+        return
+
+    # Save steps to state
+    state.save_plan_steps(task, steps)
+    click.echo(f"[Planning] Done. {len(steps)} steps identified.")
+
+    # Show plan
+    for i, step in enumerate(steps, 1):
+        click.echo(f"  {i}. {step}")
+
+    # Phase 2: Execute each step
+    for step_num, step_desc in enumerate(steps, 1):
+        click.echo(f"\n[Step {step_num}/{len(steps)}] {step_desc}")
+
+        # Execute step
+        messages = [{"role": "user", "content": step_desc}]
+
+        for round_num in range(1, max_rounds + 1):
+            tool_schemas = tools.get_all_schemas() if tools.names() else None
+            response = llm.chat(messages, tools=tool_schemas)
+
+            # Add to messages
+            messages.append({"role": "assistant", "content": response.content})
+
+            # Handle tool calls
+            if response.tool_calls:
+                for tc in response.tool_calls:
+                    click.echo(f"  Tool: {tc.name}({tc.arguments})")
+                    result = tools.execute(tc.name, tc.arguments)
+
+                    output = result.output[:200] if result.output else result.error
+                    click.echo(f"  Result: {output}{'...' if len(result.output or result.error) > 200 else ''}")
+
+                    # Check for failure
+                    if not result.success:
+                        # Retry logic
+                        state.update_step_status(
+                            step_num, "failed", retry_count=1
+                        )
+                        click.echo("  [Retry] Step failed, attempting again...")
+                        # Continue to next iteration of while loop
+
+                    messages.append({
+                        "role": "tool",
+                        "tool_call_id": tc.id,
+                        "content": result.output if result.success else result.error,
+                    })
+            else:
+                # No tool calls - step complete
+                break
+
+        click.echo(f"  [Step {step_num}] Complete.")
+
+    click.echo("\n" + "=" * 40)
+    click.echo("Execution complete.")
+
+
+def _parse_steps(text: str) -> list[str]:
+    """Parse steps from planning response."""
+    # Look for lines starting with "- "
+    steps = []
+    for line in text.split("\n"):
+        line = line.strip()
+        if line.startswith("- "):
+            steps.append(line[2:])
+        elif line.startswith("1. ") or line.startswith("2. "):
+            # Also handle numbered lists
+            match = re.match(r"^\d+\.\s+(.+)", line)
+            if match:
+                steps.append(match.group(1))
+    return steps
+
+
+def _run_simple(llm, tools, state, config, task: str, max_rounds: int):
+    """Run a task without multi-step planning."""
     # Build messages
     messages = [{"role": "user", "content": task}]
 

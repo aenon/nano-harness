@@ -29,6 +29,7 @@ class Config:
     multi_step_planning: bool = False
     subagents: bool = False
     checkpointing: bool = False
+    planning_retry_limit: int = 2
 
 
 def load_config(config_path: Optional[str] = None) -> Config:
@@ -70,6 +71,7 @@ def load_config(config_path: Optional[str] = None) -> Config:
                 config.multi_step_planning = feats.get("multi_step_planning", False)
                 config.subagents = feats.get("subagents", False)
                 config.checkpointing = feats.get("checkpointing", False)
+                config.planning_retry_limit = feats.get("planning_retry_limit", 2)
         except ImportError:
             # Python < 3.11, try tomli
             try:
