@@ -29,9 +29,9 @@ Create a Python project that computes fibonacci numbers:
 
 ### Success criteria
 
-- [ ] Virtual environment created with `uv venv`
-- [ ] fibonacci.py created with working fib() function
-- [ ] Correct output: 55, 6765, 0, 1
+- [x] Virtual environment created with `uv venv`
+- [x] fibonacci.py created with working fib() function
+- [x] Correct output: 55, 6765, 0, 1
 
 ---
 
@@ -56,8 +56,8 @@ Create a Python HTTP API server in a new directory 'api_project' that:
 
 ### Success criteria
 
-- [x] Server starts successfully (multi-step: step 2 attempted)
-- [ ] /health returns JSON - server not started properly
+- [ ] Server starts successfully
+- [ ] /health returns JSON
 - [ ] /fib?n=10 returns 55
 
 ---
@@ -108,6 +108,18 @@ Create an HTTP server in directory 'introspect_project':
 
 ### Success criteria
 
-- [ ] help() exploration shows HTTPServer, BaseHTTPRequestHandler
+- [x] help() exploration shows HTTPServer, BaseHTTPRequestHandler
 - [ ] Server starts
 - [ ] /hello returns {"message": "hello"}
+
+---
+
+### Test 3 Results
+
+| Metric | ON | OFF |
+|--------|-----|-----|
+| Explore http.server | ✓ Discovered APIs | ✓ Same |
+| Write server.py | ✓ | ✓ Multiple attempts |
+| Start server | Attempted (port issue) | ❌ Never tried |
+
+**Key insight**: Multi-step ON tried to start server (failed on port), OFF never even attempted - just wrote file.
