@@ -85,3 +85,29 @@ Multi-step helps with **complexity management** but the model still struggles wi
 - File paths (creating in correct directory)
 - Background processes
 - Sequential operations requiring persistent state
+
+---
+
+## Test 3: Introspection-First Server
+
+### Prompt
+
+```
+Create an HTTP server in directory 'introspect_project':
+1. First use help() and dir() to explore http.server module and find available classes
+2. Use what you discover to create server.py with /hello endpointReturning {"message": "hello"}
+3. Start server in background
+4. Test with curl /hello and show output
+```
+
+### Why This Should Work Better
+
+- Model doesn't need to "know" the API - it discovers
+- Clear first step: "explore http.server"
+- Less reliance on training knowledge
+
+### Success criteria
+
+- [ ] help() exploration shows HTTPServer, BaseHTTPRequestHandler
+- [ ] Server starts
+- [ ] /hello returns {"message": "hello"}
