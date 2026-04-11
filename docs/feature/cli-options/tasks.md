@@ -8,4 +8,4 @@
 - [x] 6. Test run with custom system prompt
 - [x] 7. Test run with temperature 0.2
 - [x] 8. Verify history saved to DB
-- [ ] 9. Commit and push
+- [x] 9. Commit and push

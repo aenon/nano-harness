@@ -80,8 +80,11 @@ nano_harness/
 ## Development
 
 ```bash
+# Install dev dependencies
+uv sync --dev
+
 # Lint
-uv run --with ruff ruff check nano_harness/
+uv run ruff check nano_harness/
 
 # Test connectivity
 uv run python -c "

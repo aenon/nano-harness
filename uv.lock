@@ -218,12 +218,12 @@ dependencies = [
     { name = "openai" },
     { name = "pydantic" },
     { name = "python-dotenv" },
+    { name = "ruff" },
 ]
 
 [package.optional-dependencies]
 dev = [
     { name = "pytest" },
-    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -234,7 +234,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.0.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4.0" },
+    { name = "ruff", specifier = ">=0.4.0" },
 ]
 provides-extras = ["dev"]
 
