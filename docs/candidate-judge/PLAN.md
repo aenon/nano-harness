@@ -37,9 +37,22 @@ From our tests:
 | Binary | Success or fail only |
 | Score | 1-10 quality score |
 | Feedback | What's wrong and how to fix |
-| All of above | Most comprehensive |
+| All | All of above |
 
-**Question**: What level of evaluation needed?
+**Decision: Feedback with success criteria**
+
+- Each task/step includes success criteria (e.g., "file exists", "output contains X")
+- Judge evaluates: Does candidate meet success criteria?
+- If not: What specifically is wrong and how to fix
+
+### Edge Cases
+
+| Case | How to Handle |
+|------|--------------|
+| Partial success | Judge marks which criteria passed/failed |
+| Success criteria unclear | Use defaults (exit code 0, output non-empty) |
+| Timeout/hang | Judge marks as "needs investigation" |
+| Infinite loop | Max retries, then fail |
 
 ### 3. Judge Prompt Structure
 
@@ -172,14 +185,30 @@ When ready to implement:
 
 ---
 
+### 9. Decision Priority
+
+After discussing each question, we should implement in order of impact:
+
+1. **Q2 (What to evaluate)** - Core to judge function
+2. **Q5 (Retry logic)** - Prevents infinite loops
+3. **Q4 (Feedback format)** - Makes retries actionable
+4. **Q3 (Prompt structure)** - Drives evaluation quality
+5. **Q1 (When to invoke)** - Already decided
+6. **Q6 (Cost)** - Acceptable tradeoff
+7. **Q7 (Model)** - Can tune later
+8. **Q8 (Blocking)** - Can optimize later
+
+---
+
 ## Questions for Discussion
 
 Please review and let's decide together:
 1. [x] When to invoke judge? ✅ (After each round)
-2. [ ] What does judge evaluate?
+2. [x] What does judge evaluate? ✅ (Feedback with success criteria)
 3. [ ] Judge prompt structure?
 4. [ ] Feedback format?
 5. [ ] Retry logic?
 6. [ ] Accept 2x cost?
 7. [ ] Model for judge?
 8. [ ] Blocking or async?
+9. [x] Edge cases? ✅ (Added above)
