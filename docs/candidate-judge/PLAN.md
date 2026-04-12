@@ -15,6 +15,10 @@ From our tests:
 
 ## Gaps to Decided Together
 
+## Decision: Judge Every Round ✅
+
+**Chosen**: After each round - simpler flow, better feedback, fewer wasted retries.
+
 ### 1. When to Invoke Judge?
 
 | Option | Pro | Con |
@@ -130,10 +134,48 @@ def run_with_judge(task, max_rounds):
 
 ---
 
+## Questions for Discussion (Decided)
+
+- [x] 1. When to invoke judge? → After each round
+- [ ] 2. What does judge evaluate?
+- [ ] 3. Judge prompt structure?
+- [ ] 4. Feedback format?
+- [ ] 5. Retry logic?
+- [ ] 6. Accept 2x cost?
+- [ ] 7. Model for judge?
+- [ ] 8. Blocking or async?
+
+---
+
+## Implementation Checklist
+
+When ready to implement:
+
+- [ ] Write `docs/candidate-judge/judge_prompt.md`
+  - [ ] Base instructions
+  - [ ] Few-shot examples
+  - [ ] Output format
+  
+- [ ] Implement judge in harness
+  - [ ] `nano_harness/judge.py` - judge function
+  - [ ] Update `config.py` - add judge config
+  - [ ] Update `cli.py` - add `--judge` flag
+  
+- [ ] Test with verification prompts
+  - [ ] Fibonacci venv test
+  - [ ] API server test
+  - [ ] Introspection test
+  
+- [ ] Verify improvement
+  - [ ] Compare rounds needed (before vs after)
+  - [ ] Compare success rate
+
+---
+
 ## Questions for Discussion
 
 Please review and let's decide together:
-1. [ ] When to invoke judge?
+1. [x] When to invoke judge? ✅ (After each round)
 2. [ ] What does judge evaluate?
 3. [ ] Judge prompt structure?
 4. [ ] Feedback format?
