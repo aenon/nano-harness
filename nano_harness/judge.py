@@ -1,5 +1,4 @@
 """Judge module for evaluating task completion."""
-import re
 from dataclasses import dataclass
 
 

@@ -3,12 +3,11 @@ import time
 import uuid
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel
 
 from .client import LLMClient
 from .config import load_config
-from .tools import get_registry
 
 
 app = FastAPI(title="nano-harness API")
@@ -113,7 +112,7 @@ async def chat_completions(
     
     # Initialize
     llm = LLMClient(config)
-    tools = get_registry()
+    # Note: tool registry available via get_registry() when needed
     
     # Convert messages - filter out tool messages (we handle them differently)
     messages = []
