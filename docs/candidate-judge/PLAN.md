@@ -56,11 +56,31 @@ From our tests:
 
 ### 3. Judge Prompt Structure
 
+**Decision: Fixed template, minimum instructions**
+
 ```
-You are a judge. Task: {task}
-Candidate: {output}
-Did it succeed? If not, why and how to fix?
+You are a judge. Evaluate if the candidate completed the task successfully.
+
+Task: {task}
+Success criteria: {criteria}
+Candidate output: {output}
+
+Respond in this format:
+SUCCESS: true/false
+REASON: (why it succeeded or failed)
+FIX: (specific how to fix if failed)
 ```
+
+**Why this works:**
+
+| Element | Purpose |
+|---------|---------|
+| Fixed template | No per-task prompt engineering |
+| SUCCESS: true/false | Machine-parseable |
+| REASON | Human-readable explanation |
+| FIX | Actionable retry guidance |
+
+**Works for any candidate type:** code, error, text, empty, etc.
 
 **Question**: What instructions and few-shot examples?
 
@@ -205,10 +225,10 @@ After discussing each question, we should implement in order of impact:
 Please review and let's decide together:
 1. [x] When to invoke judge? ✅ (After each round)
 2. [x] What does judge evaluate? ✅ (Feedback with success criteria)
-3. [ ] Judge prompt structure?
+3. [x] Judge prompt structure? ✅ (Fixed template)
 4. [ ] Feedback format?
 5. [ ] Retry logic?
 6. [ ] Accept 2x cost?
 7. [ ] Model for judge?
 8. [ ] Blocking or async?
-9. [x] Edge cases? ✅ (Added above)
+9. [x] Edge cases? ✅ (Added)
