@@ -82,49 +82,65 @@ FIX: (specific how to fix if failed)
 
 **Works for any candidate type:** code, error, text, empty, etc.
 
-**Question**: What instructions and few-shot examples?
-
 ### 4. Feedback Format
 
-| Format | Example |
-|--------|--------|
-| Natural language | "Server not running on port 8000" |
-| JSON | `{"issue": "...", "fix": "..."}` |
-| Structured | ISSUE=..., FIX=... |
+**Decision: Natural language, prefixed format**
 
-**Question**: What format is most actionable?
+```
+SUCCESS: true/false
+REASON: (brief explanation)
+FIX: (actionable step - "what to try next")
+```
+
+Examples:
+- "Port 8000 in use, try 8080 instead"
+- "File already exists, delete or use existing directory"
+- "Syntax error on line 3, fix the parentheses"
+
+Uses natural language but maintains 3-line structure.
 
 ### 5. Retry Logic
 
-- Max judge retries: 1? 2? 3?
-- When to give up: After X failures?
-- Escalation: What if judge keeps failing?
+**Decision: Max 2 judge retries, then give up**
 
-**Question**: How many retries before giving up?
+```
+Round 1: LLM → Tool → Output → Judge → FAIL, FIX=...
+Round 2: LLM + FIX → Tool → Output → Judge → FAIL, FIX=...
+Round 3: Give up (fail the task)
+```
+
+- Judge says SUCCESS → Stop, return result
+- Judge says FAIL → Add FIX to prompt, retry
+- After 2 failures → Give up, return best effort
+
+**Why 2?** Enough to fix simple issues, not enough to loop forever.
 
 ### 6. Cost Concern
 
-- 2 LLM calls per round → 2x cost
-- Is it worth it? 
-- When does it help most?
+**Decision: Accept 2x cost, trade for better verification**
 
-**Question**: Accept 2x cost for better verification?
+- Judge adds 1 extra LLM call per round
+- But likely fewer total rounds (no blind retries)
+- Net: May not double cost, but simpler debugging
 
 ### 7. Model for Judge
 
-Options:
-- Same model (consistent)
-- Smaller model (faster, cheaper)
-- Configurable
+**Decision: Same model, configurable**
 
-**Question**: Same or different model?
+- Use same model for consistency
+- But make configurable in config.toml
+
+**Decision: Same model, configurable**
+
+- Use same model for consistency
+- But make configurable in config.toml
 
 ### 8. Blocking vs Non-Blocking
 
-- Blocking: Wait for judge before continuing
-- Async: Run judge in parallel, check later
+**Decision: Blocking (simpler)**
 
-**Question**: Should we block execution?
+- Wait for judge before continuing each round
+- Simpler debugging: output → judge → next
 
 ---
 
@@ -226,9 +242,31 @@ Please review and let's decide together:
 1. [x] When to invoke judge? ✅ (After each round)
 2. [x] What does judge evaluate? ✅ (Feedback with success criteria)
 3. [x] Judge prompt structure? ✅ (Fixed template)
-4. [ ] Feedback format?
-5. [ ] Retry logic?
-6. [ ] Accept 2x cost?
+4. [x] Feedback format? ✅ (Natural language, prefixed)
+5. [x] Retry logic? ✅ (Max 2 retries)
+6. [x] Accept 2x cost? ✅ (Accept trade-off)
+7. [x] Model for judge? ✅ (Same model)
+8. [x] Blocking or async? ✅ (Blocking)
+
+### 5. Retry Logic
+
+**Decision: Max 2 judge retries, then give up**
+
+```
+Round 1: LLM → Tool → Output → Judge → FAIL, FIX=...
+Round 2: LLM + FIX → Tool → Output → Judge → FAIL, FIX=...
+Round 3: Give up (fail the task)
+```
+
+- Judge says SUCCESS → Stop, return result
+- Judge says FAIL → Add FIX to prompt, retry
+- After 2 failures → Give up, return best effort
+
+**Why 2?** Enough to fix simple issues, not enough to loop forever.
+
+---
+
+### 6. Cost Concern
 7. [ ] Model for judge?
 8. [ ] Blocking or async?
 9. [x] Edge cases? ✅ (Added)
