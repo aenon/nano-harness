@@ -1,5 +1,4 @@
 """Judge module for evaluating task completion."""
-import re
 from dataclasses import dataclass
 
 
@@ -22,11 +21,14 @@ IMPORTANT:
 - Consider what the command was trying to do, not just the output
 - Shell redirection (> file) typically succeeds with empty output
 - If the output mentions success or the command matches the task goal, consider it success
+- For code files: prefer to VERIFY by running the code, not just assuming it works
 
 Respond in this format:
 SUCCESS: true/false
 REASON: (why it succeeded or failed)
-FIX: (specific how to fix if failed)"""
+FIX: (specific how to fix if failed)
+
+VERIFICATION TIP: If unsure, ask the model to run a verification command (e.g., "cat filename", "python filename", "ls -la")."""
 
 
 def judge(llm_client, task: str, criteria: str, output: str) -> Judgment:

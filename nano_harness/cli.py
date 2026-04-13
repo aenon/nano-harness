@@ -5,7 +5,7 @@ import click
 
 from .client import LLMClient
 from .config import load_config
-from .judge import judge, get_default_criteria
+from .judge import get_default_criteria
 from .state import get_state
 from .tools import get_registry
 
@@ -139,7 +139,7 @@ def _run_with_judge(llm, tools, state, config, task: str, criteria: str, max_rou
             click.echo("Task failed - no outputs produced.")
 def _run_with_planning_and_judge(llm, tools, state, config, task: str, criteria: str, max_rounds: int):
     """Run a task with multi-step planning and candidate judge."""
-    from .judge import judge as judge_fn
+    # Note: judge imported in _execute_step_with_judge
     
     # Phase 1: Planning
     click.echo("\n[Planning] Creating plan...")
