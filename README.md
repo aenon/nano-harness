@@ -50,6 +50,44 @@ uv run python -m nano_harness.cli run "What is 5*5?" -t 0.2
 uv run python -m nano_harness.cli run "Your task here" --max-rounds 3
 ```
 
+## API Server
+
+Run as an OpenAI-compatible API server for use with AI coding tools like OpenCode:
+
+```bash
+# Start server (default port 8080)
+uv run python -m nano_harness.server
+
+# Or with custom port
+uv run python -m nano_harness.server --port 9000
+```
+
+### API Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /v1/chat/completions` | OpenAI-compatible chat endpoint |
+| `GET /health` | Health check |
+
+### Example
+
+```bash
+curl -X POST http://localhost:8080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nemotron",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+### Supported Parameters
+
+- `messages` - conversation history
+- `model` - model name (passed but uses config)
+- `temperature` - sampling temperature
+- `max_tokens` - max response tokens
+- `tools` - function calling schema
+
 ## Features
 
 Feature flags in `config.toml`:
@@ -68,9 +106,11 @@ checkpointing = true      # Persist state between rounds
 nano_harness/
 ├── config.py    # Load .env + feature flags
 ├── client.py    # LLM API client (OpenAI-compatible)
-├── tools.py    # Tool registry + shell execution
+├── tools.py     # Tool registry + shell execution
 ├── state.py     # SQLite checkpointing
-└── cli.py       # CLI entry point
+├── cli.py       # CLI entry point
+├── judge.py     # Candidate-judge self-verification
+└── server.py    # FastAPI OpenAI-compatible server
 ```
 
 ## Available Tools
