@@ -190,6 +190,38 @@ async def health():
     return {"status": "ok"}
 
 
+# --- OpenAI Model Endpoint ---
+
+class Model(BaseModel):
+    id: str
+    object: str = "model"
+    created: int
+    owned_by: str = "nano-harness"
+
+
+class ModelList(BaseModel):
+    object: str = "list"
+    data: list[Model]
+
+
+@app.get("/v1/models", response_model=ModelList)
+async def list_models():
+    """List available models.
+    
+    Returns the list of models supported by nano-harness.
+    """
+    return ModelList(
+        data=[
+            Model(
+                id="nemotron",
+                created=1700000000,  # Approximate, just needs to be valid
+                owned_by="nvidia",
+            ),
+            # Add more models as they become supported
+        ]
+    )
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8080)
