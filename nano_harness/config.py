@@ -46,16 +46,47 @@ def load_config(config_path: Optional[str] = None) -> Config:
     # Load .env
     load_dotenv()
 
-    # LLM config from env
-    # Model ID format: "nvidia/nemotron-3-nano-30b-a3b" (use full path for NVIDIA NIM)
-    model = os.getenv("LLM_MODEL", "nvidia/nemotron-3-nano-30b-a3b")
+    # Determine config file path
+    if config_path is None:
+        config_path = os.getenv("NANO_CONFIG", "config.toml")
+
+    config_file = Path(config_path)
+    llm_config = {}
+    if config_file.exists():
+        try:
+            import tomllib
+
+            with open(config_file, "rb") as f:
+                data = tomllib.load(f)
+            if "llm" in data:
+                llm_config = data["llm"]
+        except ImportError:
+            # Python < 3.11, try tomli
+            try:
+                import tomli as tomllib
+
+                with open(config_file, "rb") as f:
+                    data = tomllib.load(f)
+                if "llm" in data:
+                    llm_config = data["llm"]
+            except ImportError:
+                pass  # No toml parser
+
+    # Model from config or env (config takes precedence)
+    model = llm_config.get("model") or os.getenv("LLM_MODEL", "nvidia/nemotron-3-nano-30b-a3b")
     # If model doesn't start with a namespace, add "nvidia/" prefix
     if "/" not in model:
         model = f"nvidia/{model}"
 
+    # Base URL from config or env (config takes precedence)
+    base_url = llm_config.get("base_url") or os.getenv("LLM_BASE_URL", "")
+
+    # API key - only from env var (do not store in config files)
+    api_key = os.getenv("LLM_API_KEY", "")
+
     config = Config(
-        llm_base_url=os.getenv("LLM_BASE_URL", ""),
-        llm_api_key=os.getenv("LLM_API_KEY", ""),
+        llm_base_url=base_url,
+        llm_api_key=api_key,
         llm_model=model,
         temperature=float(os.getenv("TEMPERATURE", "0.7")),
         system_prompt=os.getenv("SYSTEM_PROMPT", DEFAULT_SYSTEM_PROMPT),
@@ -64,10 +95,6 @@ def load_config(config_path: Optional[str] = None) -> Config:
     )
 
     # Load features from config.toml if exists
-    if config_path is None:
-        config_path = os.getenv("NANO_CONFIG", "config.toml")
-
-    config_file = Path(config_path)
     if config_file.exists():
         try:
             import tomllib

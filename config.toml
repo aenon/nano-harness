@@ -1,6 +1,19 @@
 # Nano Harness Configuration
 # Features can be toggled on/off for experimentation
 
+[llm]
+# Base URL for OpenAI-compatible API
+base_url = "https://integrate.api.nvidia.com/v1"
+
+# Model identifier (e.g., "nemotron-3-nano-30b-a3b")
+model = "nemotron-3-nano-30b-a3b"
+
+# API key: set via LLM_API_KEY environment variable (do not commit secrets)
+
+# Optional: Reasoning settings
+# reasoning_budget = 16384
+# enable_thinking = true
+
 [features]
 # Candidate-Judge: external subagent evaluates candidate
 candidate_judge = false
