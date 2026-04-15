@@ -7,7 +7,11 @@ Minimal multi-agent framework for nano-class models (e.g., Nemotron-3-nano-30b-a
 ### 1. Install Dependencies
 
 ```bash
+# Install core dependencies
 uv sync
+
+# Install server dependencies (required for API server)
+uv sync --extra server
 ```
 
 ### 2. Configure LLM
@@ -53,6 +57,8 @@ uv run python -m nano_harness.cli run "Your task here" --max-rounds 3
 ## API Server
 
 Run as an OpenAI-compatible API server for use with AI coding tools like OpenCode:
+
+> **Note:** The server requires the `server` extra. Run `uv sync --extra server` first.
 
 ```bash
 # Start server (default port 8080)
