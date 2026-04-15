@@ -184,7 +184,6 @@ def _execute_step_with_judge(llm, tools, state, config, task: str, criteria: str
     from .judge import judge as judge_fn
     
     retry_limit = config.planning_retry_limit
-    original_task = task
     
     for attempt in range(1, retry_limit + 1):
         if attempt > 1:
@@ -218,11 +217,12 @@ def _execute_step_with_judge(llm, tools, state, config, task: str, criteria: str
             else:
                 break
         
-        # Judge accumulated outputs
+        # Judge accumulated outputs - evaluate step completion, not full task
         if step_outputs:
             click.echo(f"\n  [Judge] Evaluating {len(step_outputs)} outputs...")
             combined = "\n---\n".join(step_outputs)
-            judgment = judge_fn(llm, original_task, criteria, combined)
+            # Judge against the step goal, not the full task
+            judgment = judge_fn(llm, step_desc, criteria, combined)
             
             click.echo(f"    SUCCESS: {judgment.success}")
             click.echo(f"    REASON: {judgment.reason}")
