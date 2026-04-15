@@ -32,6 +32,15 @@ class Config:
     planning_retry_limit: int = 2
 
 
+# Default system prompt for all LLM interactions
+DEFAULT_SYSTEM_PROMPT = """You are a coding assistant. Execute the user's task using the available tools.
+
+IMPORTANT VERIFICATION REQUIREMENTS:
+1. After executing commands that modify state (file creation, installation, etc.), ALWAYS verify the result
+2. Commands that succeed with empty output (e.g., `source venv`, `> file`) should be followed by a verification command
+3. Verify with commands that produce visible output: `ls -la`, `cat file`, `echo $VAR`, `python -c "import module"`
+4. Do not assume commands succeeded - always confirm with a verification step"""
+
 def load_config(config_path: Optional[str] = None) -> Config:
     """Load configuration from .env and config.toml."""
     # Load .env
@@ -49,7 +58,7 @@ def load_config(config_path: Optional[str] = None) -> Config:
         llm_api_key=os.getenv("LLM_API_KEY", ""),
         llm_model=model,
         temperature=float(os.getenv("TEMPERATURE", "0.7")),
-        system_prompt=os.getenv("SYSTEM_PROMPT", ""),
+        system_prompt=os.getenv("SYSTEM_PROMPT", DEFAULT_SYSTEM_PROMPT),
         reasoning_budget=int(os.getenv("REASONING_BUDGET", "0")) or None,
         enable_thinking=os.getenv("ENABLE_THINKING", "false").lower() == "true",
     )
