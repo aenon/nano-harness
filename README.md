@@ -1,6 +1,6 @@
 # Nano Harness
 
-Minimal multi-agent framework for nano-class models (e.g., Nemotron-3-nano-30b-a3b).
+Minimal multi-agent framework for LLMs.
 
 ## Quick Start
 
