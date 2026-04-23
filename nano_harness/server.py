@@ -190,6 +190,63 @@ async def health():
     return {"status": "ok"}
 
 
+# --- OpenAI Model Endpoint ---
+
+class Model(BaseModel):
+    id: str
+    object: str = "model"
+    created: int
+    owned_by: str = "nano-harness"
+
+
+class ModelList(BaseModel):
+    object: str = "list"
+    data: list[Model]
+
+
+def _get_models_from_config() -> list[Model]:
+    """Dynamically load models from config.toml."""
+    import tomllib
+    from pathlib import Path
+    
+    config_file = Path("config.toml")
+    if not config_file.exists():
+        # Fallback to default if no config
+        return [Model(id="nemotron", created=1700000000, owned_by="nvidia")]
+    
+    try:
+        with open(config_file, "rb") as f:
+            data = tomllib.load(f)
+        
+        models = []
+        if "llm" in data and "model" in data["llm"]:
+            model_id = data["llm"]["model"]
+            # Extract owner from base_url if possible
+            owned_by = "nano-harness"
+            if "nvidia" in data["llm"].get("base_url", ""):
+                owned_by = "nvidia"
+            models.append(Model(
+                id=model_id,
+                created=1700000000,  # Approximate timestamp
+                owned_by=owned_by,
+            ))
+        
+        return models if models else [Model(id="nemotron", created=1700000000, owned_by="nvidia")]
+    except Exception:
+        # Fallback on any error
+        return [Model(id="nemotron", created=1700000000, owned_by="nvidia")]
+
+
+@app.get("/v1/models", response_model=ModelList)
+async def list_models():
+    """List available models.
+    
+    Returns the list of models supported by nano-harness,
+    dynamically generated from config.toml.
+    """
+    return ModelList(data=_get_models_from_config())
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8080)
