@@ -3,6 +3,7 @@ from .client import LLMClient, LLMResponse, ToolCall
 from .config import Config, load_config
 from .state import State, get_state, TaskRecord
 from .tools import ToolRegistry, ToolResult, get_registry, shell_tool
+from .subagent import Subagent, SubagentResult, AgentPool
 
 __version__ = "0.1.0"
 
@@ -19,4 +20,7 @@ __all__ = [
     "ToolResult",
     "get_registry",
     "shell_tool",
+    "Subagent",
+    "SubagentResult",
+    "AgentPool",
 ]

@@ -7,7 +7,8 @@ from .client import LLMClient
 from .config import load_config
 from .judge import get_default_criteria
 from .state import get_state
-from .tools import get_registry
+from .subagent import AgentPool
+from .tools import get_registry, register_subagent_tool, set_subagent_pool
 
 PLANNING_PROMPT = """You are a task planner. Break down the user's task into actionable steps.
 Format: Each step on a new line, starting with "- ". Keep steps simple and sequential."""
@@ -50,6 +51,22 @@ def run(task: str, system: str, temperature: float, max_rounds: int, db: str, ju
     llm = LLMClient(config)
     tools = get_registry()
     state = get_state(db)
+
+    # Initialize subagent pool if enabled
+    pool = None
+    if config.subagents:
+        pool = AgentPool(config, max_rounds=min(max_rounds, 3))
+        set_subagent_pool(pool)
+        register_subagent_tool()
+        # Inject subagent guidance into system prompt
+        agent_list = ", ".join(pool.list())
+        config.system_prompt = (
+            "You are the orchestrator. Break down tasks and delegate to specialized subagents "
+            f"using the invoke_subagent tool. Available agents: {agent_list}. "
+            "Use 'research' to gather information, 'execute' to run commands, "
+            "'review' to evaluate results. After delegating, verify the subagent's output.\n\n"
+            + config.system_prompt
+        )
 
     click.echo(f"Running task: {task}")
     click.echo(f"Model: {config.llm_model}")
