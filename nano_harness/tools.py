@@ -77,6 +77,14 @@ class ToolRegistry:
 # Default registry instance
 _default_registry = ToolRegistry()
 
+# Optional: subagent pool reference (set by CLI when subagents enabled)
+_subagent_pool = None
+
+def set_subagent_pool(pool):
+    """Set the subagent pool for the subagent tool."""
+    global _subagent_pool
+    _subagent_pool = pool
+
 # Register shell tool
 _default_registry.register(
     "shell",
@@ -101,6 +109,54 @@ _default_registry.register(
 )
 
 
+def register_subagent_tool():
+    """Register the subagent tool with the default registry."""
+    _default_registry.register(
+        "invoke_subagent",
+        subagent_tool,
+        {
+            "type": "function",
+            "function": {
+                "name": "invoke_subagent",
+                "description": "Invoke a specialized subagent to handle a specific task. Available agents: research, review, execute.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "agent": {
+                            "type": "string",
+                            "description": "The agent to invoke (research, review, execute).",
+                        },
+                        "task": {
+                            "type": "string",
+                            "description": "The specific task for the subagent to complete.",
+                        },
+                    },
+                    "required": ["agent", "task"],
+                },
+            },
+        },
+    )
+
+
 def get_registry() -> ToolRegistry:
     """Get the default tool registry."""
     return _default_registry
+
+
+def subagent_tool(params: dict) -> ToolResult:
+    """Invoke a specialized subagent to handle a task."""
+    agent_name = params.get("agent", "")
+    task = params.get("task", "")
+
+    if not agent_name or not task:
+        return ToolResult(success=False, output="", error="agent and task are required")
+    if _subagent_pool is None:
+        return ToolResult(success=False, output="", error="Subagent pool not initialized")
+
+    agent = _subagent_pool.get(agent_name)
+    if agent is None:
+        available = ", ".join(_subagent_pool.list())
+        return ToolResult(success=False, output="", error=f"Unknown agent: {agent_name}. Available: {available}")
+
+    result = agent.run(task)
+    return ToolResult(success=True, output=result.output)
